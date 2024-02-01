@@ -22,6 +22,7 @@ from tflite_support.task import processor
 from tflite_support.task import vision
 import utils
 
+import picar_4wd as fc
 
 def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
         enable_edgetpu: bool) -> None:
@@ -64,6 +65,7 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
 
   # Continuously capture images from the camera and run inference
   while cap.isOpened():
+    loop_start = time.time()
     success, image = cap.read()
     if not success:
       sys.exit(
@@ -81,9 +83,24 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
 
     # Run object detection estimation using the model.
     detection_result = detector.detect(input_tensor)
-
+    
+    detected_objects = []
+    for detection in detection_result.detections:
+        detected_objects.append(detection.categories[0].category_name)
+    #print(detection_result[0].categories[0].category_name)
+    #print(detection_result[categories[category_name]])
     # Draw keypoints and edges on input image
     image = utils.visualize(image, detection_result)
+    fc.forward(1)
+
+    print(detected_objects)
+    if "stop sign" in detected_objects:
+        print("stop sign detected")
+        #stop for 2 seconds move past the stop sign then start detecting again
+        fc.stop()
+        time.sleep(5)
+        fc.forward(20)
+        time.sleep(5)
 
     # Calculate the FPS
     if counter % fps_avg_frame_count == 0:
@@ -101,6 +118,10 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
     if cv2.waitKey(1) == 27:
       break
     cv2.imshow('object_detector', image)
+    loop_end = time.time()
+    total_time = loop_end - loop_start
+    if total_time < .2:
+        time.sleep(.2 - total_time)
 
   cap.release()
   cv2.destroyAllWindows()
