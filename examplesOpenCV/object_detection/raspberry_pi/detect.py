@@ -24,6 +24,8 @@ import utils
 
 import picar_4wd as fc
 
+
+
 def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
         enable_edgetpu: bool) -> None:
   """Continuously run inference on images acquired from the camera.
@@ -62,7 +64,7 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
   options = vision.ObjectDetectorOptions(
       base_options=base_options, detection_options=detection_options)
   detector = vision.ObjectDetector.create_from_options(options)
-
+  flag = False
   # Continuously capture images from the camera and run inference
   while cap.isOpened():
     loop_start = time.time()
@@ -94,13 +96,19 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
     fc.forward(1)
 
     print(detected_objects)
-    if "stop sign" in detected_objects:
+
+    if not flag:
+      if "stop sign" in detected_objects:
         print("stop sign detected")
         #stop for 2 seconds move past the stop sign then start detecting again
         fc.stop()
         time.sleep(5)
-        fc.forward(20)
-        time.sleep(5)
+        fc.forward(25)
+        flag = True
+
+    if "stop sign" not in detected_objects:
+        flag = False
+        
 
     # Calculate the FPS
     if counter % fps_avg_frame_count == 0:
