@@ -65,6 +65,7 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
       base_options=base_options, detection_options=detection_options)
   detector = vision.ObjectDetector.create_from_options(options)
   flag = False
+  ignoreTime = time.time()
   # Continuously capture images from the camera and run inference
   while cap.isOpened():
     loop_start = time.time()
@@ -97,17 +98,16 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
 
     print(detected_objects)
 
-    if not flag:
+    if time.time() >= ignoreTime:
       if "stop sign" in detected_objects:
         print("stop sign detected")
         #stop for 2 seconds move past the stop sign then start detecting again
         fc.stop()
-        time.sleep(5)
-        fc.forward(25)
-        flag = True
+        ignoreTime = time.time() + 5
 
-    if "stop sign" not in detected_objects:
-        flag = False
+    if time.time >= ignoreTime:
+        fc.forward(25)
+    
         
 
     # Calculate the FPS
