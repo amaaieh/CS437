@@ -15,6 +15,7 @@
 import argparse
 import sys
 import time
+import numpy as np
 
 import cv2
 from tflite_support.task import core
@@ -23,6 +24,7 @@ from tflite_support.task import vision
 import utils
 
 import picar_4wd as fc
+from threading import Thread
 
 
 
@@ -56,6 +58,8 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
   font_thickness = 1
   fps_avg_frame_count = 10
 
+  flag = True
+
   # Initialize the object detection model
   base_options = core.BaseOptions(
       file_name=model, use_coral=enable_edgetpu, num_threads=num_threads)
@@ -64,11 +68,9 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
   options = vision.ObjectDetectorOptions(
       base_options=base_options, detection_options=detection_options)
   detector = vision.ObjectDetector.create_from_options(options)
-  flag = False
-  ignoreTime = time.time()
+
   # Continuously capture images from the camera and run inference
   while cap.isOpened():
-    loop_start = time.time()
     success, image = cap.read()
     if not success:
       sys.exit(
@@ -78,37 +80,77 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
     counter += 1
     image = cv2.flip(image, 1)
 
-    # Convert the image from BGR to RGB as required by the TFLite model.
-    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    result = image.copy()
 
-    # Create a TensorImage object from the RGB image.
-    input_tensor = vision.TensorImage.create_from_array(rgb_image)
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    # Run object detection estimation using the model.
-    detection_result = detector.detect(input_tensor)
+    # lower boundary RED color range values; Hue (0 - 10)
+    lower1 = np.array([0, 100, 20])
+    upper1 = np.array([10, 255, 255])
     
-    detected_objects = []
-    for detection in detection_result.detections:
-        detected_objects.append(detection.categories[0].category_name)
-    #print(detection_result[0].categories[0].category_name)
-    #print(detection_result[categories[category_name]])
-    # Draw keypoints and edges on input image
-    image = utils.visualize(image, detection_result)
-    fc.forward(1)
-
-    print(detected_objects)
-
-    if time.time() >= ignoreTime:
-      if "stop sign" in detected_objects:
-        print("stop sign detected")
-        #stop for 2 seconds move past the stop sign then start detecting again
-        fc.stop()
-        ignoreTime = time.time() + 5
-
-    if time.time >= ignoreTime:
-        fc.forward(25)
+    # upper boundary RED color range values; Hue (160 - 180)
+    lower2 = np.array([160,100,20])
+    upper2 = np.array([179,255,255])
     
+    lower_mask = cv2.inRange(hsv, lower1, upper1)
+    upper_mask = cv2.inRange(hsv, lower2, upper2)
+    
+    full_mask = lower_mask + upper_mask
+    
+    result = cv2.bitwise_and(result, result, mask=full_mask)
+
+    gray = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY) 
+
+    # setting threshold of gray image 
+    _, threshold = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY) 
+
+    contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    i = 0
+    for contour in contours:
+       #detects the entire screen as a rectangle
+       if i == 0:
+         i+=1
+         continue
+
+       approx = cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True) 
+       
+       cv2.drawContours(image, [contour], 0, (0, 0, 255), 5)
+       M = cv2.moments(contour)
+       if M['m00'] != 0.0: 
+            x = int(M['m10']/M['m00']) 
+            y = int(M['m01']/M['m00']) 
+
+       if len(approx) == 8:
+            cv2.putText(image, 'Octagon', (x, y),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            if flag:
+                fc.stop()
+                time.sleep(3)
+                flag = False
         
+        #IS IT RED
+
+    fc.forward(1)
+    # # Convert the image from BGR to RGB as required by the TFLite model.
+    # rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    # # Create a TensorImage object from the RGB image.
+    # input_tensor = vision.TensorImage.create_from_array(rgb_image)
+
+    # # Run object detection estimation using the model.
+    # detection_result = detector.detect(input_tensor)
+    
+    # detected_objects = []
+    # for detection in detection_result.detections:
+    #     detected_objects.append(detection.categories[0].category_name)
+    # #print(detection_result[0].categories[0].category_name)
+    # #print(detection_result[categories[category_name]])
+    # # Draw keypoints and edges on input image
+    # image = utils.visualize(image, detection_result)
+    # fc.forward(1)
+
+    # print(detected_objects) 
 
     # Calculate the FPS
     if counter % fps_avg_frame_count == 0:
@@ -126,10 +168,6 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
     if cv2.waitKey(1) == 27:
       break
     cv2.imshow('object_detector', image)
-    loop_end = time.time()
-    total_time = loop_end - loop_start
-    if total_time < .2:
-        time.sleep(.2 - total_time)
 
   cap.release()
   cv2.destroyAllWindows()
