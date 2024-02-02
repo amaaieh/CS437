@@ -13,17 +13,17 @@ def backwardX(x):
 
 def turn180():
     fc.turn_right(50)
-    time.sleep(2.8)
+    time.sleep(2.4)
     fc.stop()
 
 def turnRight90():
-    fc.turn_right(50)
-    time.sleep(1.4)
+    fc.turn_right(25)
+    time.sleep(1.6)
     fc.stop()
 
 def turnLeft90():
-    fc.turn_left(50)
-    time.sleep(1.4)
+    fc.turn_left(25)
+    time.sleep(1.6)
     fc.stop()
 
 forwardX(1)
