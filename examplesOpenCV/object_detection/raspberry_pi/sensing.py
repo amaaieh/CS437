@@ -2,6 +2,8 @@ import picar_4wd as fc
 import time
 import numpy as np
 import nav
+import matplotlib.pyplot as plt
+import mapping
 
 from enum import Enum
 
@@ -24,7 +26,7 @@ scanDist = 80
 piMap = np.zeros((250, 250))
 
 #hardcode our robot start position to the middle of the map facing North
-startVector = [np.array([500, 500]), NORTH, 0]
+startVector = [np.array([100, 100]), NORTH, 0]
 picarVector = startVector
 
 def completeScan():
@@ -34,13 +36,28 @@ def completeScan():
         tmp = fc.get_distance_at(angle)
         scan_list.append(tmp)    
     
-    return scan_list
+    print(scan_list)
+    parsed_scan_list = []
+    for scan_val in scan_list:
+        if scan_val == -2 or scan_val > 80:
+            parsed_scan_list.append(0)
+        else:
+            parsed_scan_list.append(1)
+    
+    print(parsed_scan_list)
+    return parsed_scan_list
+
+def plot_map(updated_map):
+    plt.imshow(mapping.pad_map(updated_map), cmap='binary', interpolation='nearest', origin='lower')
+    plt.colorbar()  # Optionally add a color bar
+    plt.savefig("map.png")
 
 def ScanSurroundings():
     
+    global piMap
     scan_list = completeScan()
-    print("done scanning")
-    print(scan_list)
+    piMap = mapping.update_map_by_scan(piMap, scan_list, picarVector[DIRECTION], picarVector[POSITION])
+    plot_map(piMap)
 
 def Move(newDir):
     changeDirection(newDir)
@@ -68,6 +85,7 @@ def updateVec(newDir):
     if(picarVector[NUMSTEPS] == 4):
         picarVector[NUMSTEPS] = 0
         ScanSurroundings()
+        #calcualte next A*
         
 #change direction will physiclly rotate the car to face the new direction
 def changeDirection(newDir):
@@ -91,6 +109,8 @@ def changeDirection(newDir):
 
 #TESTING
 def tests():
+    ScanSurroundings()
+    #A* get next 5 moves
     Move(NORTH) #straight
     Move(SOUTH) #180
     Move(EAST)  #left
@@ -103,8 +123,8 @@ def tests():
     Move(WEST) #right
     Move(NORTH) #right
 
-# tests()
-ScanSurroundings()
+tests()
+#ScanSurroundings()
 # Heuristic for A* algorithim 
 # OPEN = priority queue containing START
 # CLOSED = empty set

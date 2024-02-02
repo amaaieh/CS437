@@ -5,7 +5,7 @@ from scipy.ndimage import distance_transform_edt
 
 def update_map_by_scan(map, scan, facing, car_position, distance=80):
   for i in range(len(scan)):
-    rads = i*math.pi/180.0
+    rads = 5*i*math.pi/180.0
     x_diff = distance*math.cos(rads)
     y_diff = distance*math.sin(rads)
     target = (0,0)
