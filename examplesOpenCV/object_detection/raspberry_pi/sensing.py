@@ -125,7 +125,7 @@ def get_directions(point_list):
         print("ENDPOIT" + str(endPoint))
         return
 
-
+    
     for p_idx in range(0, 51, 10):
         if(p_idx >= 10):
             x = point_list[p_idx][0] - point_list[p_idx - 10][0]
@@ -138,11 +138,17 @@ def get_directions(point_list):
                 Move(NORTH)
             if(y < -5):
                 Move(SOUTH)
-    
+
+def graph_path(map, path):
+    plt.imshow(map, cmap='binary', interpolation='nearest', origin='lower')
+    path_x, path_y = zip(*path)
+    plt.plot(path_x, path_y, marker='s', color='red', markersize=5)  # 's' for squares
+    plt.savefig("mapPath" + str(map_idx) + ".png")
 while True:
     ScanSurroundings()
     copy = np.copy(piMap)
     point_list = navigation.astar_numpy(mapping.pad_map(copy), picarVector[POSITION], endPoint)
+    graph_path(copy, point_list)
     get_directions(point_list)
 
 
