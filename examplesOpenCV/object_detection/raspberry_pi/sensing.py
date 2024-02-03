@@ -64,6 +64,7 @@ def ScanSurroundings():
     
     global piMap
     scan_list = completeScan()
+    piMap = np.zeros_like(piMap)
     piMap = mapping.update_map_by_scan(piMap, scan_list, picarVector[DIRECTION], picarVector[POSITION])
     plot_map(piMap)
 
