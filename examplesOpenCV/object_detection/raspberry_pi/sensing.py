@@ -4,6 +4,7 @@ import numpy as np
 import nav
 import matplotlib.pyplot as plt
 import mapping
+import navigation
 
 from enum import Enum
 
@@ -12,6 +13,8 @@ NORTH = 0
 EAST = 1
 SOUTH = 2
 WEST = 3
+
+map_idx = 0
 
 #used to make accessing vector more readable
 POSITION = 0
@@ -24,6 +27,7 @@ scanDist = 80
 
 #map of our surroundings each 0 represents a cm^2 area
 piMap = np.zeros((250, 250))
+endPoint = (100, 230)
 
 #hardcode our robot start position to the middle of the map facing North
 startVector = [np.array([100, 100]), NORTH, 0]
@@ -36,21 +40,25 @@ def completeScan():
         tmp = fc.get_distance_at(angle)
         scan_list.append(tmp)    
     
-    print(scan_list)
     parsed_scan_list = []
     for scan_val in scan_list:
         if scan_val == -2 or scan_val > 80:
             parsed_scan_list.append(0)
         else:
-            parsed_scan_list.append(1)
+            parsed_scan_list.append(scan_val)
     
-    print(parsed_scan_list)
     return parsed_scan_list
 
 def plot_map(updated_map):
-    plt.imshow(mapping.pad_map(updated_map), cmap='binary', interpolation='nearest', origin='lower')
+    global map_idx
+    copy = np.copy(updated_map)
+    plt.imshow(mapping.pad_map(copy), cmap='binary', interpolation='nearest', origin='lower')
     plt.colorbar()  # Optionally add a color bar
-    plt.savefig("map.png")
+    plt.savefig("mapC" + str(map_idx) + ".png")
+    plt.plot(picarVector[POSITION][0], picarVector[POSITION][1], marker="o", markersize=5, markeredgecolor="red", markerfacecolor="green")
+    print("MAPC#" + str(map_idx))
+    plt.clf
+    map_idx += 1
 
 def ScanSurroundings():
     
@@ -61,9 +69,9 @@ def ScanSurroundings():
 
 def Move(newDir):
     changeDirection(newDir)
-    updateVec(newDir)
-    print(picarVector)
     nav.forwardX(1)
+    updateVec(newDir)
+    print("PICAR VECTOR" + str(picarVector))
     return
 
 def updateVec(newDir):
@@ -71,20 +79,21 @@ def updateVec(newDir):
     picarVector[DIRECTION] = newDir
 
     if picarVector[DIRECTION] == NORTH:
-        picarVector[POSITION] += np.array([10, 0])
+        picarVector[POSITION] += np.array([0, 8])
     elif picarVector[DIRECTION] == EAST:
-        picarVector[POSITION] += np.array([0, 10])
+        picarVector[POSITION] += np.array([8, 0])
     elif picarVector[DIRECTION] == SOUTH:
-        picarVector[POSITION] += np.array([-10, 0])
+        picarVector[POSITION] += np.array([0, -8])
     elif picarVector[DIRECTION] == WEST:
-        picarVector[POSITION] += np.array([0, -10])
+        picarVector[POSITION] += np.array([-8, 0])
     else:
         print("you messed up")
     
     picarVector[NUMSTEPS] += 1
-    if(picarVector[NUMSTEPS] == 4):
+    if(picarVector[NUMSTEPS] == 1):
         picarVector[NUMSTEPS] = 0
         ScanSurroundings()
+        print("PICAR POSITION" + str(picarVector[POSITION]))
         #calcualte next A*
         
 #change direction will physiclly rotate the car to face the new direction
@@ -107,24 +116,35 @@ def changeDirection(newDir):
         print("Error changing from " + str(picarVector[DIRECTION]) + " to " + str(newDir))
         exit(-1)
 
-#TESTING
-def tests():
-    ScanSurroundings()
-    #A* get next 5 moves
-    Move(NORTH) #straight
-    Move(SOUTH) #180
-    Move(EAST)  #left
-    Move(SOUTH) #right
-    Move(NORTH) #180
-    Move(WEST) #left
-    Move(SOUTH) #left
-    Move(EAST) #left
-    Move(SOUTH) #right
-    Move(WEST) #right
-    Move(NORTH) #right
+def get_directions(point_list):
+    
 
-tests()
-#ScanSurroundings()
+    if point_list == None or len(point_list) == 1:
+        print("PICAR POSITION" + str(picarVector[POSITION]))
+        print("ENDPOIT" + str(endPoint))
+        return
+
+
+    for p_idx in range(0, 51, 10):
+        if(p_idx >= 10):
+            x = point_list[p_idx][0] - point_list[p_idx - 10][0]
+            y = point_list[p_idx][1] - point_list[p_idx - 10][1]
+            if(x > 5):
+                Move(EAST)
+            if(x < -5):
+                Move(WEST)
+            if(y > 5):
+                Move(NORTH)
+            if(y < -5):
+                Move(SOUTH)
+    
+while True:
+    ScanSurroundings()
+    copy = np.copy(piMap)
+    point_list = navigation.astar_numpy(mapping.pad_map(copy), picarVector[POSITION], endPoint)
+    get_directions(point_list)
+
+
 # Heuristic for A* algorithim 
 # OPEN = priority queue containing START
 # CLOSED = empty set

@@ -99,11 +99,13 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
     
     result = cv2.bitwise_and(result, result, mask=full_mask)
 
+  
     gray = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY) 
 
     # setting threshold of gray image 
     _, threshold = cv2.threshold(gray, 50, 255, cv2.THRESH_BINARY) 
 
+    #Octagaon code if there is a white space how many edges do you have?
     contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     i = 0
@@ -120,18 +122,21 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
        if M['m00'] != 0.0: 
             x = int(M['m10']/M['m00']) 
             y = int(M['m01']/M['m00']) 
-
+# Flag is used so the top sign is detected once.
        if len(approx) == 8:
             cv2.putText(image, 'Octagon', (x, y),
             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            #STOPSIGN DETECTED
             if flag:
                 fc.stop()
                 time.sleep(3)
                 flag = False
         
         #IS IT RED
-
+    
+    #IF STOPSIGN IS NOT DETECTED OR IF WE ALREADY STOPPED
     fc.forward(1)
+    
     # # Convert the image from BGR to RGB as required by the TFLite model.
     # rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
