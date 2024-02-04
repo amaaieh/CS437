@@ -5,7 +5,7 @@ import nav
 import matplotlib.pyplot as plt
 import mapping
 import navigation
-# import detect
+import detect
 
 from enum import Enum
 
@@ -128,8 +128,7 @@ def get_directions(point_list):
 
     
     for p_idx in range(0, len(point_list), 10):
-        # if detect.start():
-        #     time.sleep(5)
+        detect.start()
         if(p_idx >= 10):
             x = point_list[p_idx][0] - point_list[p_idx - 10][0]
             y = point_list[p_idx][1] - point_list[p_idx - 10][1]
