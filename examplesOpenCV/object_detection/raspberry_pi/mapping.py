@@ -31,6 +31,6 @@ def update_map_by_scan(map, scan, facing, car_position, distance=80):
 def pad_map(map):
   copy = np.copy(map) 
   distance_map = distance_transform_edt(copy == 0)
-  close_areas = distance_map <= 10
+  close_areas = distance_map <= 20
   copy[close_areas] = 1
   return copy
