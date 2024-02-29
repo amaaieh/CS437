@@ -5,6 +5,7 @@ import nav
 import matplotlib.pyplot as plt
 import mapping
 import navigation
+import detect
 
 from enum import Enum
 
@@ -27,7 +28,7 @@ scanDist = 80
 
 #map of our surroundings each 0 represents a cm^2 area
 piMap = np.zeros((250, 250))
-endPoint = (100, 230)
+endPoint = (150, 230)
 
 #hardcode our robot start position to the middle of the map facing North
 startVector = [np.array([100, 100]), NORTH, 0]
@@ -64,6 +65,7 @@ def ScanSurroundings():
     
     global piMap
     scan_list = completeScan()
+    #piMap = np.zeros_like(piMap)
     piMap = mapping.update_map_by_scan(piMap, scan_list, picarVector[DIRECTION], picarVector[POSITION])
     plot_map(piMap)
 
@@ -79,20 +81,20 @@ def updateVec(newDir):
     picarVector[DIRECTION] = newDir
 
     if picarVector[DIRECTION] == NORTH:
-        picarVector[POSITION] += np.array([0, 8])
+        picarVector[POSITION] += np.array([0, 27])
     elif picarVector[DIRECTION] == EAST:
-        picarVector[POSITION] += np.array([8, 0])
+        picarVector[POSITION] += np.array([27, 0])
     elif picarVector[DIRECTION] == SOUTH:
-        picarVector[POSITION] += np.array([0, -8])
+        picarVector[POSITION] += np.array([0, -27])
     elif picarVector[DIRECTION] == WEST:
-        picarVector[POSITION] += np.array([-8, 0])
+        picarVector[POSITION] += np.array([-27, 0])
     else:
         print("you messed up")
     
     picarVector[NUMSTEPS] += 1
     if(picarVector[NUMSTEPS] == 1):
         picarVector[NUMSTEPS] = 0
-        ScanSurroundings()
+        #ScanSurroundings()
         print("PICAR POSITION" + str(picarVector[POSITION]))
         #calcualte next A*
         
@@ -124,24 +126,38 @@ def get_directions(point_list):
         print("ENDPOIT" + str(endPoint))
         return
 
-
-    for p_idx in range(0, 51, 10):
+    
+    for p_idx in range(0, len(point_list), 10):
+        detect.start()
         if(p_idx >= 10):
             x = point_list[p_idx][0] - point_list[p_idx - 10][0]
             y = point_list[p_idx][1] - point_list[p_idx - 10][1]
-            if(x > 5):
+            print("x = " + str(x) )
+            print("y = " + str(y))
+            if p_idx % 30 == 0: 
+                completeScan()
+            if(x >= 5):
                 Move(EAST)
-            if(x < -5):
+            if(x <= -5):
                 Move(WEST)
-            if(y > 5):
+            if(y >= 5):
                 Move(NORTH)
-            if(y < -5):
+            if(y <= -5):
                 Move(SOUTH)
-    
+
+def graph_path(map, path):
+    plt.imshow(map, cmap='binary', interpolation='nearest', origin='lower')
+    path_x, path_y = zip(*path)
+    plt.plot(path_x, path_y, marker='s', color='red', markersize=3)  # 's' for squares
+    plt.plot(picarVector[POSITION][0], picarVector[POSITION][1], marker="o", markersize=5, markeredgecolor="black", markerfacecolor="green")
+    plt.savefig("mapPath" + str(map_idx) + ".png")
+    plt.clf()
+
 while True:
     ScanSurroundings()
     copy = np.copy(piMap)
     point_list = navigation.astar_numpy(mapping.pad_map(copy), picarVector[POSITION], endPoint)
+    graph_path(copy, point_list)
     get_directions(point_list)
 
 
