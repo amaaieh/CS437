@@ -12,6 +12,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     try:
         while 1:
+            print("1")
             client, clientInfo = s.accept()
             print("server recv from: ", clientInfo)
             data = client.recv(1024)      # receive 1024 Bytes of message in binary format
@@ -29,11 +30,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     controls.backward()
                 else:
                     controls.stop()
-                # print(data)     
                 result = utils.pi_read()
-                #print(type(result["battery"]))
-                client.sendall(str(result["battery"]) + ";" + str(result["cpu_temperature"]) + ";" + str(result["cpu_usage"]).encode()) # Echo back to client
-
+                message = str(result["battery"]) + ";" + str(result["cpu_temperature"]) + ";" + str(result["cpu_usage"])
+                client.sendall(message.encode()) # Echo back to client
+                print("end")
     except: 
         print("Closing socket")
         client.close()
