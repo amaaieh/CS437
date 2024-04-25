@@ -1,51 +1,38 @@
-import pyaudio
 import socket
-import select
+import pyaudio
 
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
-CHUNK = 4096
+CHUNK = 1024
+
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind(('0.0.0.0', 5555))
+server_socket.listen(5)
+print("Server listening...")
+
+connection, client_address = server_socket.accept()
+print(f"Connection from {client_address}")
 
 audio = pyaudio.PyAudio()
 
-serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-serversocket.bind(('', 4444))
-serversocket.listen(5)
+stream_out = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, output=True, frames_per_buffer=CHUNK)
+stream_in = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK)
 
+while True:
+    try:
+        data = connection.recv(CHUNK)
+        stream_out.write(data)
+        data = stream_in.read(CHUNK)
+        connection.sendall(data)
+    except KeyboardInterrupt:
+        break
 
-def callback(in_data, frame_count, time_info, status):
-    for s in read_list[1:]:
-        s.send(in_data)
-    return (None, pyaudio.paContinue)
-
-# start Recording
-stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK, stream_callback=callback)
-# stream.start_stream()
-
-read_list = [serversocket]
-print ("recording...")
-
-try:
-    while True:
-        readable, writable, errored = select.select(read_list, [], [])
-        for s in readable:
-            if s is serversocket:
-                (clientsocket, address) = serversocket.accept()
-                read_list.append(clientsocket)
-                print ("Connection from"), address
-            else:
-                data = s.recv(1024)
-                if not data:
-                    read_list.remove(s)
-except KeyboardInterrupt:
-    pass
-
-
-print ("finished recording")
-
-serversocket.close()
-# stop Recording
-stream.stop_stream()
-stream.close()
+print("Closing connection...")
+stream_out.stop_stream()
+stream_out.close()
+stream_in.stop_stream()
+stream_in.close()
 audio.terminate()
+connection.close()
+server_socket.close()
