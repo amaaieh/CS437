@@ -10,7 +10,8 @@ import socket
 import time
 
 # Choose One
-ip = "127.0.0.1"
+ip = socket.gethostbyname(socket.gethostname())
+client_ip = "127.0.0.1"
 
 client1 = CameraClient(ip, 9999)
 
@@ -24,7 +25,7 @@ sender_thread.start()
 
 time.sleep(5)
 
-receiver = AudioReceiver(ip, 5554)
+receiver = AudioReceiver(client_ip, 5554)
 receive_thread = threading.Thread(target=receiver.start_server)
 receive_thread.start()
 

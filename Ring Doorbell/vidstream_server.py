@@ -5,14 +5,16 @@ import threading
 import socket
 import time
 
-ip = "127.0.0.1"
+ip = socket.gethostbyname(socket.gethostname())
+client_ip = "127.0.0.1"
+
 
 server = StreamingServer(ip, 9999)
 
 
 server.start_server()
 
-receiver = AudioReceiver(ip, 5555)
+receiver = AudioReceiver(client_ip, 5555)
 receive_thread = threading.Thread(target=receiver.start_server)
 receive_thread.start()
 
