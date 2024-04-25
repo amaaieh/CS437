@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Script</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <button id="run-script-btn">Commands</button>
+    <script>
+        $(document).ready(function(){
+            $("#run-script-btn").click(function(){
+                $.post("/runscript", function(data){
+                    alert(data.message);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
