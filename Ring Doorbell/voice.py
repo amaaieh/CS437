@@ -5,6 +5,7 @@ from twisted.internet import reactor
 import pyaudio
 
 
+
 class Client(DatagramProtocol):
     def startProtocol(self):
         py_audio = pyaudio.PyAudio()
