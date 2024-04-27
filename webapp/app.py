@@ -1,6 +1,6 @@
+import socket
 from flask import Flask, render_template, request, jsonify
 from sr import recog
-import socket
 #http://127.0.0.1:5000
 
 app = Flask(__name__)
@@ -24,8 +24,8 @@ def send_command(data):
 def index():
     return render_template('index.html')
 
-@app.route('/runscript', methods=['POST'])
-def run_script():
+@app.route('/sr', methods=['POST'])
+def sr():
     text_received = recog()
     if text_received:  # Check if any text was received
         print(text_received) 
@@ -41,6 +41,11 @@ def run_script():
             response = send_command("record")
             return jsonify({"message": text_received, "pi_response": response}), 200
     return jsonify({"error": "No text recognized"}), 400
+
+@app.route('/talk', methods=['POST'])
+def talk():
+    print("talk button")
+    return '', 200
 
 if __name__ == "__main__":
 

@@ -3,15 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Run Script</title>
+    <title>Hoop</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/logo.ico') }}">
+
+
 </head>
 <body>
-    <button id="run-script-btn">Commands</button>
+    <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo" alt="Descriptive Alt Text">
+    <button id="run-sr-btn" class="button-46" role="button">Voice Commands</button>
     <script>
         $(document).ready(function(){
-            $("#run-script-btn").click(function(){
-                $.post("/runscript", function(data){
+            $("#run-sr-btn").click(function(){
+                $.post("/sr", function(data){
+                    alert(data.message);
+                });
+            });
+        });
+    </script>
+    <button id="run-call-btn" class="button-46" role="button">Talk</button>
+    <script>
+        $(document).ready(function(){
+            $("#run-call-btn").click(function(){
+                $.post("/talk", function(data){
                     alert(data.message);
                 });
             });
