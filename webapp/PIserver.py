@@ -1,5 +1,6 @@
 # Raspberry Pi server code
 import socket
+from commands import command_response
 
 def start_server():
     host = ''  # Bind to all interfaces
@@ -18,13 +19,11 @@ def start_server():
                         break
                     # You can process the received data here
                     data = data.decode()
-                    #functionImake(data)
                     print("Received:", data)
-                    conn.sendall(data)  # Echo back the received data
+                    command_response(data)
+                    conn.sendall(data.encode())  # Echo back the received data
 
 if __name__ == '__main__':
     start_server()
 
 
-
-#functionImake{}
