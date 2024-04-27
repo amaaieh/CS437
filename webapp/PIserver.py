@@ -17,8 +17,14 @@ def start_server():
                     if not data:
                         break
                     # You can process the received data here
-                    print("Received:", data.decode())
+                    data = data.decode()
+                    #functionImake(data)
+                    print("Received:", data)
                     conn.sendall(data)  # Echo back the received data
 
 if __name__ == '__main__':
     start_server()
+
+
+
+#functionImake{}

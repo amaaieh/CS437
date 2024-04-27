@@ -6,7 +6,7 @@ import socket
 app = Flask(__name__)
 
 def send_to_pi(data):
-    host = 'raspberrypi_ip'  # Replace with your Raspberry Pi's IP address
+    host = '10.0.101.4'  # Replace with your Raspberry Pi's IP address
     port = 12345
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((host, port))
@@ -28,9 +28,20 @@ def index():
 def run_script():
     text_received = recog()
     if text_received:  # Check if any text was received
-        response = send_command(text_received)
-        return jsonify({"message": text_received, "pi_response": response}), 200
+        print(text_received) 
+        if ("lock" not in text_received) and ("unlock" not in text_received) and ("record" not in text_received):
+            return jsonify({"error": "No text recognized"}), 400
+        if ("unlock" in text_received):
+            response = send_command("unlock")
+            return jsonify({"message": text_received, "pi_response": response}), 200
+        elif ("lock" in text_received):
+            response = send_command("lock")
+            return jsonify({"message": text_received, "pi_response": response}), 200
+        elif ("record" in text_received):
+            response = send_command("record")
+            return jsonify({"message": text_received, "pi_response": response}), 200
     return jsonify({"error": "No text recognized"}), 400
 
 if __name__ == "__main__":
+
     app.run(debug=True)
