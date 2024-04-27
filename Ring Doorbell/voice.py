@@ -26,7 +26,7 @@ class Client(DatagramProtocol):
             if self.isPi or keyboard.is_pressed('t'):
                 #print(self.isPi, keyboard.is_pressed('t'))
                 print("Key press")
-                data = self.input_stream.read(self.buffer)
+                data = self.input_stream.read(self.buffer, exception_on_overflow=False)
                 self.transport.write(data, self.another_client)
 
     def datagramReceived(self, datagram, addr):
