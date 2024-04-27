@@ -12,7 +12,7 @@ class Client(DatagramProtocol):
     def startProtocol(self):
         py_audio = pyaudio.PyAudio()
         self.buffer = 1024  # 127.0.0.1
-        self.another_client = input("Write address: "), int(input("Write port: "))
+        self.another_client = input("Write address: "), int(input("Port: "))
         self.output_stream = py_audio.open(format=pyaudio.paInt16,
                                            output=True, rate=44100, channels=1,
                                            frames_per_buffer=self.buffer)
@@ -25,6 +25,7 @@ class Client(DatagramProtocol):
         while True:
             if self.isPi or keyboard.is_pressed('t'):
                 #print(self.isPi, keyboard.is_pressed('t'))
+                print("Key press")
                 data = self.input_stream.read(self.buffer)
                 self.transport.write(data, self.another_client)
 
@@ -36,7 +37,7 @@ class Client(DatagramProtocol):
 
 
 if __name__ == '__main__':
-    port = randint(1000, 3000)
+    port = 2222
     print("Working on port: ", port)
     cli = Client()
     cli.toggleIsPi()  # Defaults to true
