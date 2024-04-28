@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Camera Stream</title>
+    <style>
+        img {
+            display: block;
+            margin: 0 auto; /* Center the image horizontally */
+            max-width: 100%; /* Ensure the image doesn't exceed the width of its container */
+            height: auto; /* Maintain aspect ratio */
+        }
+    </style>
+</head>
+<body>
+    <h1>Camera Stream</h1>
+    <img id="video-stream" src="" alt="Video Stream">
+    
+    <script>
+        function updateImage() {
+            fetch('/get_latest_image')
+                .then(response => response.text())
+                .then(data => {
+                    // Update the image source
+                    if (data == "-1") {
+                        // Set the src attribute to a default image URL
+                        document.getElementById('video-stream').src = '/images/camera.jpg';
+                    } else {
+                        // Update the image source
+                        document.getElementById('video-stream').src = 'data:image/jpeg;base64,' + data;
+                    }
+                });
+        }
+
+        // Refresh the image every 1 second (adjust as needed)
+        setInterval(updateImage, 100);
+    </script>
+</body>
+</html>
