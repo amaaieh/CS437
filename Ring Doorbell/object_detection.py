@@ -44,7 +44,7 @@ def run(model: str, camera_id: int, width: int, height: int, num_threads: int,
   cap = cv2.VideoCapture(camera_id)
   cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
   cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-
+ 
   # Visualization parameters
   row_size = 20  # pixels
   left_margin = 24  # pixels
