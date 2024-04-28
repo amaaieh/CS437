@@ -32,5 +32,30 @@
             });
         });
     </script>
+    
+    <div align="center">
+        <h1>Camera Stream</h1>
+        <img id="video-stream" src="" alt="Video Stream">
+    </div>
+    
+    <script>
+        function updateImage() {
+            fetch('/get_latest_image')
+                .then(response => response.text())
+                .then(data => {
+                    // Update the image source
+                    if (data == "-1") {
+                        // Set the src attribute to a default image URL
+                        document.getElementById('video-stream').src = "{{ url_for('static', filename='images/camera.jpg') }}";
+                    } else {
+                        // Update the image source
+                        document.getElementById('video-stream').src = 'data:image/jpeg;base64,' + data;
+                    }
+                });
+        }
+
+        // Refresh the image every 1 second (adjust as needed)
+        setInterval(updateImage, 100);
+    </script>
 </body>
 </html>
