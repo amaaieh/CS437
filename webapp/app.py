@@ -13,7 +13,7 @@ latest_image = None
 
 
 def send_to_pi(data):
-    host = "10.0.101.4"  # Replace with your Raspberry Pi's IP address
+    host = "10.0.0.220"  # Replace with your Raspberry Pi's IP address
     port = 12345
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((host, port))
@@ -59,9 +59,17 @@ def sr():
 
 @app.route("/talk", methods=["POST"])
 def talk():
-    print("talk button")
-    return "", 200
-
+    #START AUDIO SCRIPT ON THE PI
+    response = send_command("start_audio")
+    
+    #START AUDIO SCRIPT ON THE APP
+    return jsonify({"message": "Audio Start", "pi_response": response}), 200
+    
+@app.route("/toggle_video", methods=["POST"])
+def start_video():
+    #START UP VIDEO ON PI
+    response = send_command("toggle_video")
+    return jsonify({"message": "Toggle Video", "pi_response": response}), 200
 
 @app.route("/receive_image", methods=["POST"])
 def receive_image():

@@ -5,10 +5,6 @@ import subprocess
 
 
 def start_server():
-    # start up detect2.py script
-    script_path = "/home/zach/raspberry_pi/detect2.py"
-    subprocess.run(["python3", script_path])
-
     host = ""  # Bind to all interfaces
     port = 12345
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
