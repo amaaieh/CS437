@@ -4,6 +4,9 @@ from twisted.internet import reactor
 import pyaudio
 import keyboard
  
+# https://github.com/knucklesuganda/twisted_voice_chat/blob/master/main.py
+
+
 class Client(DatagramProtocol):
     def __init__(self):
         super().__init__()
@@ -12,20 +15,18 @@ class Client(DatagramProtocol):
     def startProtocol(self):
         py_audio = pyaudio.PyAudio()
         self.buffer = 1024  # 127.0.0.1
-        self.another_client = input("Write address: "), int(input("Port: "))
+        self.another_client = "10.1.101.4", 2222
         self.output_stream = py_audio.open(format=pyaudio.paInt16,
-                                           output=True, rate=44100, channels=1,
+                                           output=True, rate=16000, channels=1,
                                            frames_per_buffer=self.buffer)
         self.input_stream = py_audio.open(format=pyaudio.paInt16,
-                                          input=True, rate=44100, channels=1,
+                                          input=True, rate=16000, channels=1,
                                           frames_per_buffer=self.buffer)
         reactor.callInThread(self.record)
-
+#10.1.11.253
     def record(self):
         while True:
             if self.isPi or keyboard.is_pressed('t'):
-                #print(self.isPi, keyboard.is_pressed('t'))
-                print("Key press")
                 data = self.input_stream.read(self.buffer, exception_on_overflow=False)
                 self.transport.write(data, self.another_client)
 
