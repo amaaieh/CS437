@@ -24,8 +24,8 @@ def command_response(data):
         time.sleep(0.5)
         fc.stop()
     elif data == "toggle_video":
-        # start up detect2.py script
         if video_process == None:
+            # start up detect2.py script
             print("starting video feed")
             script_path = "/home/zach/raspberry_pi/detect2.py"
             video_process = subprocess.Popen(
@@ -34,10 +34,25 @@ def command_response(data):
                 stderr=subprocess.DEVNULL,
             )
         else:
+            # stop video script
             print("stopping video feed")
             video_process.terminate()
             video_process = None
-    elif data == "start_audio":
-        print("starting audio")
-        pass
+
+    elif data == "toggle_audio":
+        if audio_process == None:
+            # start up one_way_voice.py script
+            print("starting audio script")
+            script_path = "/home/zach/RingDoorbell/one_way_voice.py"
+            audio_process = subprocess.Popen(
+                ["python3", script_path],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        else:
+            # stop audio script
+            print("stopping video feed")
+            audio_process.terminate()
+            audio_process = None
+
     return None

@@ -4,12 +4,14 @@ from sr import recog
 import numpy as np
 import cv2
 import base64
+import subprocess
 
 # http://127.0.0.1:5000
 
 app = Flask(__name__)
 
 latest_image = None
+audio_process = None
 
 
 def send_to_pi(data):
@@ -57,19 +59,35 @@ def sr():
     return jsonify({"error": "No text recognized"}), 400
 
 
-@app.route("/talk", methods=["POST"])
+@app.route("/toggle_audio", methods=["POST"])
 def talk():
-    #START AUDIO SCRIPT ON THE PI
-    response = send_command("start_audio")
-    
-    #START AUDIO SCRIPT ON THE APP
+    global audio_process
+    # START AUDIO SCRIPT ON THE PI
+    response = send_command("toggle_audio")
+
+    if audio_process == None:
+        print("Starting audio receiver")
+        script_path = "voice.py"
+        audio_process = subprocess.Popen(
+            ["python3", script_path],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    else:
+        print("stopping video feed")
+        audio_process.terminate()
+        audio_process = None
+
+    # START AUDIO SCRIPT ON THE APP
     return jsonify({"message": "Audio Start", "pi_response": response}), 200
-    
+
+
 @app.route("/toggle_video", methods=["POST"])
 def start_video():
-    #START UP VIDEO ON PI
+    # START UP VIDEO ON PI
     response = send_command("toggle_video")
     return jsonify({"message": "Toggle Video", "pi_response": response}), 200
+
 
 @app.route("/receive_image", methods=["POST"])
 def receive_image():

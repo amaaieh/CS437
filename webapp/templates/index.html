@@ -22,11 +22,11 @@
             });
         });
     </script>
-    <button id="run-call-btn" class="button-46" role="button">Talk</button>
+    <button id="run-call-btn" class="button-46" role="button">Toggle Audio</button>
     <script>
         $(document).ready(function(){
             $("#run-call-btn").click(function(){
-                $.post("/talk", function(data){
+                $.post("/toggle_audio", function(data){
                     alert(data.message);
                 });
             });
