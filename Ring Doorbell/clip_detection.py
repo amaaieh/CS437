@@ -4,7 +4,7 @@ import cv2
 from PIL import Image
 import torch
 import clip
-
+ 
 class BoxDetector:
     def __init__(self):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
