@@ -15,7 +15,7 @@ class Client(DatagramProtocol):
     def startProtocol(self):
         py_audio = pyaudio.PyAudio()
         self.buffer = 1024  # 127.0.0.1
-        self.another_client = "10.1.101.4", 2222
+        self.another_client = "10.0.0.220", 2222
         self.output_stream = py_audio.open(format=pyaudio.paInt16,
                                            output=True, rate=16000, channels=1,
                                            frames_per_buffer=self.buffer)

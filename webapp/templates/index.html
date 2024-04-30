@@ -22,17 +22,28 @@
             });
         });
     </script>
-    <button id="run-call-btn" class="button-46" role="button">Talk</button>
+    <button id="run-call-btn" class="button-46" role="button">Toggle Audio</button>
     <script>
         $(document).ready(function(){
             $("#run-call-btn").click(function(){
-                $.post("/talk", function(data){
+                $.post("/toggle_audio", function(data){
                     alert(data.message);
                 });
             });
         });
     </script>
     
+        <button id="run-video-btn" class="button-46" role="button">Toggle Video</button>
+        <script>
+            $(document).ready(function(){
+                $("#run-video-btn").click(function(){
+                    $.post("/toggle_video", function(data){
+                        alert(data.message);
+                    });
+                });
+            });
+        </script>
+
     <div align="center">
         <h1>Camera Stream</h1>
         <img id="video-stream" src="" alt="Video Stream">

@@ -52,3 +52,8 @@
     margin-left: 3%;
     margin-top: 1%;
 }
+
+.button-container {
+    display: flex;
+    justify-content: center; /* Align buttons horizontally in the center */
+}

@@ -1,1 +1,12 @@
 /frontend_tutorial/node_modules
+/Ring Doorbell/myenv/
+Ring Doorbell/.DS_Store
+examplesOpenCV/.DS_Store
+examplesOpenCV/object_detection/.DS_Store
+.DS_Store
+webapp/static/.DS_Store
+testcam/raspberry_pi/.DS_Store
+webapp/.DS_Store
+electron/node_modules/
+webapp/__pycache__/sr.cpython-38.pyc
+zach@10.0.101.6
