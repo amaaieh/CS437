@@ -3,27 +3,22 @@ from twisted.internet.protocol import DatagramProtocol
 from twisted.internet import reactor
 import pyaudio
 import keyboard
-
-# https://github.com/knucklesuganda/twisted_voice_chat/blob/master/main.py
+import argparse
 
 
 class Client(DatagramProtocol):
-    def __init__(self):
+    def __init__(self, ip_address):
         super().__init__()
         self.isPi = True
+        self.ip_address = ip_address
 
     def startProtocol(self):
         py_audio = pyaudio.PyAudio()
         self.buffer = 1024  # 127.0.0.1
-        self.another_client = "10.0.101.4", 2222
-        self.output_stream = py_audio.open(
-            format=pyaudio.paInt16,
-            output=True,
-            rate=16000,
-            channels=1,
-            frames_per_buffer=self.buffer,
-        )
+        self.another_client = (self.ip_address, 2222)
+
         self.input_stream = py_audio.open(
+            input_device_index=1,
             format=pyaudio.paInt16,
             input=True,
             rate=16000,
@@ -32,24 +27,35 @@ class Client(DatagramProtocol):
         )
         reactor.callInThread(self.record)
 
-    # 10.1.11.253
     def record(self):
         while True:
             if self.isPi or keyboard.is_pressed("t"):
+                # print(self.isPi, keyboard.is_pressed('t'))
                 data = self.input_stream.read(self.buffer, exception_on_overflow=False)
                 self.transport.write(data, self.another_client)
 
     def datagramReceived(self, datagram, addr):
-        self.output_stream.write(datagram)
+        pass
 
     def toggleIsPi(self):
         self.isPi = not self.isPi
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        "--ip",
+        help="IP address of the destination client.",
+        required=False,
+        type=str,
+        default="10.3.161.69",
+    )
+    args = parser.parse_args()
+
     port = 2222
     print("Working on port: ", port)
-    cli = Client()
-    cli.toggleIsPi()  # Defaults to true
+    cli = Client(args.ip)
     reactor.listenUDP(port, cli)
     reactor.run()

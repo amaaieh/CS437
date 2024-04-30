@@ -11,7 +11,7 @@ video_process = None
 audio_process = None
 
 
-def command_response(data):
+def command_response(data, ip):
     global video_process
     global audio_process
 
@@ -29,7 +29,7 @@ def command_response(data):
             print("starting video feed")
             script_path = "/home/zach/raspberry_pi/detect2.py"
             video_process = subprocess.Popen(
-                ["python3", script_path],
+                ["python3", script_path, "--ip", ip],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
@@ -45,7 +45,7 @@ def command_response(data):
             print("starting audio script")
             script_path = "/home/zach/RingDoorbell/one_way_voice.py"
             audio_process = subprocess.Popen(
-                ["python3", script_path],
+                ["python3", script_path, "--ip", ip],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )

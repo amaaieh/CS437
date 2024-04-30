@@ -10,3 +10,4 @@ webapp/.DS_Store
 electron/node_modules/
 webapp/__pycache__/sr.cpython-38.pyc
 zach@10.0.101.6
+webapp/__pycache__/clip_detection.cpython-38.pyc

@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 import base64
 import subprocess
+import clip_detection as cd
 
 # http://127.0.0.1:5000
 
@@ -12,10 +13,14 @@ app = Flask(__name__)
 
 latest_image = None
 audio_process = None
+detector = None
+
+package_received = False
+frame_count = 0
 
 
 def send_to_pi(data):
-    host = "10.0.0.220"  # Replace with your Raspberry Pi's IP address
+    host = "10.0.101.4"  # Replace with your Raspberry Pi's IP address
     port = 12345
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((host, port))
@@ -33,7 +38,7 @@ def send_command(data):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", package_received=package_received)
 
 
 @app.route("/sr", methods=["POST"])
@@ -79,7 +84,7 @@ def talk():
         audio_process = None
 
     # START AUDIO SCRIPT ON THE APP
-    return jsonify({"message": "Audio Start", "pi_response": response}), 200
+    return jsonify({"message": "Toggle Audio", "pi_response": response}), 200
 
 
 @app.route("/toggle_video", methods=["POST"])
@@ -92,15 +97,21 @@ def start_video():
 @app.route("/receive_image", methods=["POST"])
 def receive_image():
     global latest_image
+    global frame_count
+    global package_received
 
     image = request.files["image"].read()
     nparr = np.frombuffer(image, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-    # SAVE FILE as image in a data folder
-    # random_num = random.randint(1, 1000)
-    # filename = os.path.join("data/", f"captured_image_{random_num}.jpg")
-    # cv2.imwrite(filename, img)
+    frame_count += 1
+
+    # DO IMAGE PROCESSING
+
+    if frame_count % 30 == 0 and detector.hasBox(img):
+        print("SEES BOX")
+        print()
+        package_received = True
 
     # DISPLAY IMG on flask application
     retval, buffer = cv2.imencode(".jpg", img)
@@ -123,5 +134,17 @@ def get_latest_image():
         return latest_image
 
 
+@app.route("/status")
+def get_status():
+    global package_received
+
+    # Serve the latest image
+    if package_received == True:
+        return "Package Received"
+    else:
+        return "Package Not Found"
+
+
 if __name__ == "__main__":
+    detector = cd.BoxDetector()
     app.run(debug=True, host="0.0.0.0", port=5001)

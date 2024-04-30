@@ -5,6 +5,7 @@ import subprocess
 
 
 def start_server():
+    ip = input("Enter Device Running Flask App IP address: ")
     host = ""  # Bind to all interfaces
     port = 12345
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -22,7 +23,7 @@ def start_server():
                     # You can process the received data here
                     data = data.decode()
                     print("Received:", data)
-                    command_response(data)
+                    command_response(data, ip)
                     conn.sendall(data.encode())  # Echo back the received data
 
 

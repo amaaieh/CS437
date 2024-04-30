@@ -11,6 +11,11 @@
 
 </head>
 <body>
+
+    <div>
+        <h1>Package Reception Status</h1>
+        <p id="status">Loading...</p>
+    </div>
     
     <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo" alt="Descriptive Alt Text">
     <div align="center">
@@ -70,5 +75,19 @@
         // Refresh the image every 1 second (adjust as needed)
         setInterval(updateImage, 100);
     </script>
+
+<script>
+    function updateStatus() {
+        fetch('/status')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('status').innerText = data;
+            });
+    }
+
+    // Refresh the image every 5 second (adjust as needed)
+    setInterval(updateStatus, 5000);
+</script>
+
 </body>
 </html>
