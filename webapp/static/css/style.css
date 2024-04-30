@@ -54,6 +54,8 @@
 }
 
 .button-container {
-    display: flex;
-    justify-content: center; /* Align buttons horizontally in the center */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
