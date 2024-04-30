@@ -24,7 +24,16 @@ class BoxDetector:
             if not ret:
                 break
 
-            print(self.hasBox(frame))
+            contains_box = self.hasBox(frame)
+            print(contains_box)
+            #Best is a box
+            #print(indices)
+            #print("Worse confidence: " + str(values[1].item()))
+            #if best == 1 and confidence > .75:
+                #print("Box: " + str(confidence))
+            #else:
+                #print("No box: " + str(confidence))
+
         
         cap.release()
         cv2.destroyAllWindows()
@@ -40,13 +49,15 @@ class BoxDetector:
             text_features /= text_features.norm(dim=-1, keepdim=True)
         similarity = (100.0 * image_features @ text_features.T)
         p_class_given_image = similarity.softmax(dim=-1)
-        values, indices = p_class_given_image[0].topk(1)
-
-
-        if indices[0] == 0:
+        values, indices = p_class_given_image[0].topk(2)
+        
+        best = indices[0]
+        confidence = values[0].item()
+        if best == 1 and confidence > .75:
+            return True
+        else:
             return False
-        return True
-
+        
 # Example usage:
 detector = BoxDetector()
 detector.test()
