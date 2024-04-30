@@ -3,7 +3,7 @@ import cv2
 from PIL import Image
 import torch
 import clip
- 
+     
 # Load CLIP model and preprocessor
 device = "cuda" if torch.cuda.is_available() else "cpu"
 clip_model, clip_preprocess = clip.load("ViT-B/32", device=device)
